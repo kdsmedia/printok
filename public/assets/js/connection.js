@@ -9,7 +9,7 @@
         this.options = null;
 
         this.socket.on('connect', () => {
-            console.info("Socket connected!");
+            console.info("Terputus!");
 
             // Reconnect to streamer if uniqueId already set
             if (this.uniqueId) {
@@ -18,17 +18,17 @@
         })
 
         this.socket.on('disconnect', () => {
-            console.warn("Socket disconnected!");
+            console.warn("Terputus!");
         })
 
         this.socket.on('streamEnd', () => {
-            console.warn("LIVE has ended!");
+            console.warn("LIVE berakhir!");
             this.uniqueId = null;
         })
 
         this.socket.on('tiktokDisconnected', (errMsg) => {
             console.warn(errMsg);
-            if (errMsg && errMsg.includes('LIVE has ended')) {
+            if (errMsg && errMsg.includes('LIVE berakhir')) {
                 this.uniqueId = null;
             }
         });
@@ -45,7 +45,7 @@
             this.socket.once('tiktokDisconnected', reject);
 
             setTimeout(() => {
-                reject('Connection Timeout');
+                reject('Terputus');
             }, 15000)
         })
     }
