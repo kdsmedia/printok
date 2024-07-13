@@ -1,3 +1,3 @@
-var MSG_GIFT = "Thank you to |username| for the gift";
-var MSG_WINNER = "Congratulations to |username| for winning";
-var MSG_TEST = "Test sound";
+var MSG_GIFT = "Terimakasih |username| Sudah Berbagi, Semoga Berkah Dan Sehat Selalu";
+var MSG_WINNER = "Pemenangnya Adalah |username|";
+var MSG_TEST = "Halo Guys";
