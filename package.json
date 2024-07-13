@@ -1,7 +1,7 @@
 {
-	"name": "tiktok-printer",
+	"name": "printer-tiktok",
 	"version": "1.0.0",
-	"description": "Tiktok Printer",
+	"description": "Printer Tiktok Live",
 	"main": "server.js",
 	"dependencies": {
 		"dotenv": "^16.0.0",
