@@ -6,8 +6,8 @@ let gameTimer = null;
 let gameStatus = false;
 
 // Config
-let confComment = false;
 let confLike = false;
+let confComment = false;
 let confShare = false;
 let confJoin = false;
 
@@ -210,8 +210,8 @@ function checkWinner(data, msg) {
 
 function loadSetting() {
     // Load
-    confComment = $("#confComment").prop('checked');
     confLike = $("#confLike").prop('checked');
+    confComment = $("#confComment").prop('checked');
     confShare = $("#confShare").prop('checked');
     confJoin = $("#confJoin").prop('checked');
 }
@@ -222,17 +222,17 @@ function loadSetting() {
 
 function connect(targetLive) {
     if (targetLive !== '') {
-        $('#stateText').text('Connecting...');
+        $('#stateText').text('Menghubungkan...');
         $("#usernameTarget").html("@"+targetLive);
         connection.connect(targetLive, {
             enableExtendedGiftInfo: true
         }).then(state => {
-            $('#stateText').text(`Connected ${state.roomId}`);
+            $('#stateText').text(`Terhubung ${state.roomId}`);
         }).catch(errorMessage => {
             $('#stateText').text(errorMessage);
         })
     } else {
-        alert('Enter username first!');
+        alert('Masukan Username Dulu Bro!');
     }
 }
 
@@ -264,9 +264,9 @@ function addMessage(data, msg) {
 
     // Check for voice
     let command = message.split(" ")[0];
-    if (command == "/say" || command == "/ngomong") {
+    if (command == "/say" || command == "/ngomong" || command == "/assalamualaikum") {
         // TTS
-        let cleanText = message.replace("/say", "").replace("/ngomong", "");
+        let cleanText = message.replace("/say", "").replace("/ngomong", "").replace("/waalaikumsalam", "");
         speakTTS(cleanText);
 
     } else {
