@@ -1,16 +1,9 @@
-# Virtual Printer for TikTok Interactive LIVE Stream
+# tiktok-printer-live
+A live printer game for TikTok
 
-This is free and open source version of TikTok Virtual Printer.
-
----
-
-### THIS REPO IS NO LONGER MAINTAINED. THIS IS FREE VERSION, PLEASE DON'T RESELL WITHOUT OUR PERMISSION!
-
----
-
-### If you want the latest version and future update, you can check https://play.gemtok.live/
-
----
+[![HitCount](https://hits.dwyl.com/alexdhg/tiktok-printer-live.svg?style=flat&show=unique)](http://hits.dwyl.com/alexdhg/tiktok-printer-live)
+![start with why](https://img.shields.io/badge/tiktok%20game%3F-brightgreen.svg?style=flat)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
 
 ## How To
 
@@ -26,11 +19,13 @@ This is free and open source version of TikTok Virtual Printer.
 - Click button <kbd>START GAME</kbd>
 - Enter your tiktok username and click <kbd>Connect</kbd>
 
-### Edit language
+### Add language
 
-- Edit words list on `/public/words.js`
-- Edit TTS message on `/public/msg.js`
+- Enter folder `/public/lang/`
+- Create new file `game_XXX.html`, `words_XXX.js`, & `msg_XXX.js`
+- Copy content from another language
 - Translate content into your language
+
 
 ## Features
 
@@ -39,3 +34,15 @@ This is free and open source version of TikTok Virtual Printer.
 - Easy to use and multi platform
 - With sound effect
 - Integrated TTS engine
+
+---
+
+### Important
+
+It currently has romanian words & translated words, but you can easily change it to what language you like. You just need some time.
+
+You can leave it AFK, stream with OBS if you have a stream key from TikTok or just point the PC's screen through TikTok mobile livestreaming.
+
+Also, it can generate you a profit, have fun!
+
+### Please, star this project if you found it useful!

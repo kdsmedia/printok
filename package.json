@@ -1,14 +1,17 @@
 {
-	"name": "printer-tiktok",
-	"version": "1.0.0",
-	"description": "Printer Tiktok Live",
+	"name": "tiktok-printer",
+	"version": "1.0.1",
+	"description": "Tiktok Printer",
 	"main": "server.js",
 	"dependencies": {
 		"dotenv": "^16.0.0",
-		"express": "^4.17.2"
+		"express": "^4.17.2",
+		"socket.io": "^4.4.1",
+		"tiktok-live-connector": "^2.0.0"
 	},
 	"scripts": {
 		"app": "node server.js"
 	},
-	"author": "Sidhanie"
+	"author": "alexdhg",
+	"type": "module"
 }
