@@ -6,8 +6,8 @@ let gameTimer = null;
 let gameStatus = false;
 
 // Config
-let confLike = false;
 let confComment = false;
+let confLike = false;
 let confShare = false;
 let confJoin = false;
 
@@ -102,11 +102,7 @@ function censor(word) {
     for (let i = 0; i < length; i++) {
         let c = word.charAt(i);
         if (i >= range_start && i <= range_end) {
-            if (c === " ") {
-                censored.push("&nbsp;&nbsp;");
-            } else {
-                censored.push("*");
-            }
+            censored.push("*");
         } else {
             censored.push(c);
         }
@@ -199,7 +195,8 @@ function checkWinner(data, msg) {
             playSound(4);
 
             // Play TTS
-            let tssMsg = MSG_WINNER.replace("|username|", data.uniqueId);
+            let userName = (data.user && (data.user.uniqueId || data.user.nickname)) ? (data.user.uniqueId || data.user.nickname) : 'Unknown';
+            let tssMsg = MSG_WINNER.replace("|username|", userName);
             speakTTS(tssMsg);
 
             // Reload game
@@ -210,8 +207,8 @@ function checkWinner(data, msg) {
 
 function loadSetting() {
     // Load
-    confLike = $("#confLike").prop('checked');
     confComment = $("#confComment").prop('checked');
+    confLike = $("#confLike").prop('checked');
     confShare = $("#confShare").prop('checked');
     confJoin = $("#confJoin").prop('checked');
 }
@@ -222,17 +219,17 @@ function loadSetting() {
 
 function connect(targetLive) {
     if (targetLive !== '') {
-        $('#stateText').text('Menghubungkan...');
+        $('#stateText').text('Connecting...');
         $("#usernameTarget").html("@"+targetLive);
         connection.connect(targetLive, {
             enableExtendedGiftInfo: true
         }).then(state => {
-            $('#stateText').text(`Terhubung ${state.roomId}`);
+            $('#stateText').text(`Connected ${state.roomId}`);
         }).catch(errorMessage => {
             $('#stateText').text(errorMessage);
         })
     } else {
-        alert('Masukan Username Dulu Bro!');
+        alert('Enter username first!');
     }
 }
 
@@ -259,14 +256,14 @@ function addContent(payload) {
 
 function addMessage(data, msg) {
     // DATA
-    let userName = data.uniqueId;
+    let userName = (data.user && (data.user.uniqueId || data.user.nickname)) ? (data.user.uniqueId || data.user.nickname) : 'Unknown';
     let message = sanitize(msg);
 
     // Check for voice
     let command = message.split(" ")[0];
-    if (command == "/say" || command == "/ngomong" || command == "/assalamualaikum") {
+    if (command == "/say" || command == "/ngomong") {
         // TTS
-        let cleanText = message.replace("/say", "").replace("/ngomong", "").replace("/waalaikumsalam", "");
+        let cleanText = message.replace("/say", "").replace("/ngomong", "");
         speakTTS(cleanText);
 
     } else {
@@ -282,66 +279,29 @@ function addMessage(data, msg) {
     }
 }
 
-function addPhoto(data, mode) {
-    // DATA
-    let userName = data.uniqueId;
-    let userAvatar = data.profilePictureUrl;
-
-    // Add
-    if (mode == "winner") {
-        addContent(
-            `<div style="text-align:center;font-size: 1.25rem;">
-                <div style='padding-bottom:.25rem;'>Hooray 🎉🎉🎉</div>
-                <div style='padding-bottom:.5rem;font-weight: bold;'>`+userName+`</div>
-                <div>
-                    <img src="`+userAvatar+`" style="width:128px;height:128px;border-radius: 15px;"/>
-                </div>
-            </div>`
-        );
+function addGift(data) {
+    let userName = (data.user && (data.user.uniqueId || data.user.nickname)) ? (data.user.uniqueId || data.user.nickname) : 'Unknown';
+    let giftName = data.gift && data.gift.name ? data.gift.name : 'gift';
+    let repeatCount = data.repeatCount || 1;
+    let msg;
+    if (typeof MSG_GIFT !== 'undefined') {
+        msg = MSG_GIFT.replace('|username|', userName);
     } else {
-        addContent(
-            `<div style="text-align:center;font-size: 1.25rem;">
-                <div style='padding-bottom:.25rem;'>Thanks for ordering Special Print</div>
-                <div style='padding-bottom:.5rem;font-weight: bold;'>`+userName+`</div>
-                <div>
-                    <img src="`+userAvatar+`" style="width:128px;height:128px;border-radius: 15px;"/>
-                </div>
-            </div>`
-        );
+        console.warn('MSG_GIFT is undefined! Did you forget to include msg_en.js?');
+        msg = userName + ' memberi gift!';
     }
-
-    // Sound
-    playSound(3);
+    msg += ` <span class='gift-highlight'>🎁 ${repeatCount} × ${sanitize(giftName)}</span>`;
+    addContent(`<span class='gift-message'>${msg}</span>`);
+    playSound(2);
 }
 
-function addGift(data) {
-    // DATA
-    let userName = data.uniqueId;
-    let giftPictureUrl = data.giftPictureUrl;
-    let giftName = data.giftName;
-    let giftRepeat = data.repeatCount;
-    let giftTotal = (data.diamondCount * data.repeatCount);
-
-    // Check
-    if (giftTotal >= 10) {
-        // Print Photo
-        addPhoto(data);
-
-    } else {
-        // Add
-        addContent(
-            `<div style="text-align:center;font-size: 1.25rem;"><div style='padding-bottom:.5rem;'>Thank you <span style='font-weight: bold;'>`+userName+`!</span></div>
-            <div style='font-weight: bold;padding-bottom:.5rem;'><img src="`+giftPictureUrl+`" style="width:32px;height:32px;"/> Sent `+giftName+`</div>
-            x`+giftRepeat.toLocaleString()+` worth `+giftTotal.toLocaleString()+` coins!</div>`
-        );
-
-        // Sound
-        playSound(2);
-
-        // Play TTS
-        let tssMsg = MSG_GIFT.replace("|username|", userName);
-        speakTTS(tssMsg);
-    }
+function addPhoto(data, reason) {
+    // Get username and profile photo
+    let userName = (data.user && (data.user.uniqueId || data.user.nickname)) ? (data.user.uniqueId || data.user.nickname) : 'Unknown';
+    let photoUrl = (data.user && data.user.profilePictureUrl) ? data.user.profilePictureUrl : '/assets/img/image.png';
+    let label = reason === 'winner' ? '🏆 Winner!' : '';
+    // Add to chat area
+    addContent(`<span class='photo-message'><img src='${photoUrl}' alt='${userName}' class='profile-photo'/> <span class='photo-label'>${label}</span> <span class='photo-username'>${userName}</span></span>`);
 }
 
 // New chat comment received
@@ -352,18 +312,23 @@ connection.on('chat', (data) => {
 
 // New gift received
 connection.on('gift', (data) => {
-    if (!isPendingStreak(data) && data.diamondCount > 0) {
-        addGift(data);
-    }
+    console.log('Gift event received:', data);
+    addGift(data);
 })
 
 // Like
 connection.on('like', (data) => {
     if (typeof data.totalLikeCount === 'number') {
-        // Check setting
         if (confLike) {
-            // Print like
-            addMessage(data, data.label.replace('{0:user}', '').replace('likes', `${data.likeCount} likes`));
+            let label = typeof data.label === 'string' ? data.label : '';
+            let msg = label.replace('{0:user}', '');
+            if (msg.includes('likes')) {
+                msg = msg.replace('likes', `${data.likeCount} likes`);
+            }
+            // Only add message if not empty after replacements
+            if (msg.trim() !== '') {
+                addMessage(data, msg);
+            }
         }
     }
 })
@@ -373,7 +338,8 @@ connection.on('social', (data) => {
     // Check setting
     if (confShare) {
         // Print share
-        addMessage(data, data.label.replace('{0:user}', ''));
+        let label = typeof data.label === 'string' ? data.label : '';
+        addMessage(data, label.replace('{0:user}', ''));
     }
 })
 
@@ -391,12 +357,12 @@ connection.on('member', (data) => {
         // Check setting
         if (confJoin) {
             // Print join
-            addMessage(data, "joined");
+            addMessage(data, "bergabung");
         }
     }, joinMsgDelay);
 })
 
 // End
 connection.on('streamEnd', () => {
-    $('#stateText').text('Stream ended.');
+    $('#stateText').text('Live Telah Rungkad.');
 })

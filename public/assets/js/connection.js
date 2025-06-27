@@ -4,12 +4,12 @@
  */
  class TikTokIOConnection {
     constructor(backendUrl) {
-        this.socket = io('https://tiktok-chat-reader.zerody.one/');
+        this.socket = io(backendUrl);
         this.uniqueId = null;
         this.options = null;
 
         this.socket.on('connect', () => {
-            console.info("Terputus!");
+            console.info("connected!");
 
             // Reconnect to streamer if uniqueId already set
             if (this.uniqueId) {
@@ -18,17 +18,17 @@
         })
 
         this.socket.on('disconnect', () => {
-            console.warn("Terputus!");
+            console.warn("disconnected!");
         })
 
         this.socket.on('streamEnd', () => {
-            console.warn("LIVE berakhir!");
+            console.warn("LIVE Telah Rungkad!");
             this.uniqueId = null;
         })
 
         this.socket.on('tiktokDisconnected', (errMsg) => {
             console.warn(errMsg);
-            if (errMsg && errMsg.includes('LIVE berakhir')) {
+            if (errMsg && errMsg.includes('LIVE Telah Rungkad!')) {
                 this.uniqueId = null;
             }
         });
@@ -45,7 +45,7 @@
             this.socket.once('tiktokDisconnected', reject);
 
             setTimeout(() => {
-                reject('Terputus');
+                reject('Connection Timeout');
             }, 15000)
         })
     }
