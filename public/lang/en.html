@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiktok Printer</title>
+  <meta name="description" content="Tiktok Printer Guess Words Game" />
+  <meta name="author" content="adierebel" />
+
+  <!-- Scripts -->
+  <script src="words_en.js"></script>
+  <script src="msg_en.js"></script>
+  <script src="../assets/tts/speakClient.js"></script>
+  <script src="../assets/js/jquery.js"></script>
+  <script src="../assets/js/socket.io.js"></script>
+  <script src="../assets/js/connection.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <!-- Styles -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* Toggle Button */
+    .menu-btn {
+      position: fixed !important;
+      top: 20px !important;
+      left: 20px !important;
+      z-index: 2000 !important;
+      background-color: #FE2C55;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Sidebar Menu */
+    .info {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 100vh;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1500;
+    }
+
+    .info.show {
+      transform: translateX(0);
+    }
+
+    .close-btn {
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    video.background {
+      width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .printer {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table.table {
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .bottom-container {
+      display: block;
+      width: 100%;
+    }
+
+    .bottom-wrapper {
+      width: 100%;
+    }
+
+    .bottom-bar {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .text-guess {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .text-caption {
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #FE2C55;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    button:hover {
+      background-color: #ff4f73;
+    }
+
+    #paperContainer {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 9 / 16;
+      margin: 0 auto;
+      background-color: #222;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    #paper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .main {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .container {
+        flex: 1;
+      }
+
+      input[type="text"] {
+        width: 140px;
+        display: inline-block;
+      }
+
+      button {
+        width: auto;
+        display: inline-block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toggle Button -->
+  <button id="menuToggle" class="menu-btn" aria-label="Toggle Menu">☰</button>
+
+  <!-- Sidebar Menu -->
+  <div class="info" id="infoPanel">
+    <span id="menuClose" class="close-btn">&times;</span>
+    <div class="mb-3"><a href="/">MENU</a></div>
+
+    <table class="mb-3">
+      <tr><td>Canvas</td><td>&nbsp;:&nbsp;</td><td id="gameSize">&infin;</td></tr>
+      <tr><td>Chat Status</td><td>&nbsp;:&nbsp;</td><td id="stateText">Not Connected</td></tr>
+      <tr><td>Game Timeout</td><td>&nbsp;:&nbsp;</td><td id="gameTimeout">&infin;</td></tr>
+      <tr><td>Remain Words</td><td>&nbsp;:&nbsp;</td><td id="gameWords">&infin;</td></tr>
+    </table>
+
+    <div class="mb-3">
+      <button id="btnPrepare">START GAME</button>
+    </div>
+
+    <div class="text-bold">Printing Settings:</div>
+    <table class="mt-2 mb-3">
+      <tr><td><input id="confComment" type="checkbox" checked />&nbsp;&nbsp;</td><td>Comment</td></tr>
+      <tr><td><input id="confLike" type="checkbox" checked />&nbsp;&nbsp;</td><td>Like</td></tr>
+      <tr><td><input id="confShare" type="checkbox" checked />&nbsp;&nbsp;</td><td>Share &amp; Follow</td></tr>
+      <tr><td><input id="confJoin" type="checkbox" />&nbsp;&nbsp;</td><td>User Joined</td></tr>
+      <tr><td colspan="2"><button id="btnSave" class="mt-2">SAVE</button></td></tr>
+    </table>
+
+    <div class="text-bold">Live Chat</div>
+    <div class="mb-3 mt-2">
+      <input id="targetUsername" type="text" placeholder="Enter @username" />
+      <button id="targetConnect">Connect</button>
+    </div>
+
+    <!-- Audio -->
+    <audio id="sfx1"><source src="../assets/sounds/printer_comment.mp3" type="audio/mpeg" /></audio>
+    <audio id="sfx2"><source src="../assets/sounds/printer_gift.mp3" type="audio/mpeg" /></audio>
+    <audio id="sfx3"><source src="../assets/sounds/printer_winner.mp3" type="audio/mpeg" /></audio>
+    <audio id="sfx4"><source src="../assets/sounds/yey.mp3" type="audio/mpeg" /></audio>
+    <audio id="tts"></audio>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="container">
+      <video class="background" autoplay muted loop>
+        <source src="../assets/media/background.mp4" type="video/mp4" />
+      </video>
+
+      <div class="printer">
+        <table class="table">
+          <tr>
+            <td id="paperContainer">
+              <div id="paper" class="paper"></div>
+            </td>
+          </tr>
+          <tr class="bottom-container">
+            <td class="bottom-wrapper">
+              <div class="bottom-bar">
+                <div class="bottom-content">
+                  <div id="textGuess" class="text-guess blink">***</div>
+                  <div class="text-caption">💬 Type the <span class="text-bold">word</span></div>
+                  <div class="text-caption" style="margin-bottom: 0;">🙋‍♀️🙋‍♂️ Guess the word to print your profile picture</div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const infoPanel = document.getElementById('infoPanel');
+    const menuClose = document.getElementById('menuClose');
+
+    menuToggle.addEventListener('click', () => {
+      infoPanel.classList.add('show');
+    });
+
+    menuClose.addEventListener('click', () => {
+      infoPanel.classList.remove('show');
+    });
+  </script>
+</body>
+</html>
